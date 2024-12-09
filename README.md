@@ -5,10 +5,18 @@
 
 # Example usage
 
-## Start the slowlog streamer:
+## Start the slowlog streamer and connect to a Redis Enterprise database:
+
 ```
 python slowlogs_streamer.py -c zu743.primary.cs.redislabs.com -h 172.31.43.246 -p 18817 -a redis -stream_port 6389 -threshold 6
 ```
+
+## Start the slowlog streamerand connect to a Redis CE database:
+
+```
+python slowlogs_streamer.py -c zumo.redis.test.localhost -h localhost -p 6379 -stream_host localhost -stream_port 6389 -threshold 6
+```
+
 
 ## Start the slowlog Consumer:
 ```
