@@ -21,14 +21,14 @@ def parse_arguments():
     parser = argparse.ArgumentParser(add_help=False)
 
     # Mandatory parameters for host (-h) and port (-p)
-    parser.add_argument('-h', default='localhost', type=str, help='Host (FQDN) of the Redis database (default: localhost)')
+    parser.add_argument('-h', default='localhost', type=str, help='Host (FQDN) of the Redis database used for streaming (default: localhost)')
     parser.add_argument('-p', default=6379, type=int, help='Port of the Redis database (default: 6379)')
     parser.add_argument('-a', default='redis', type=str, help='user:password')
-    parser.add_argument('-z', default=False, type=bool, help='Stream from the beggining')
+    parser.add_argument('-z', default=False, type=bool, help='Read from the beggining (True) of the stream or from the end (default = False)')
 
 
     parser.add_argument('-stream', type=str, help='The name of the stream to consume logs from')
-    parser.add_argument('-root_dir', default="/tmp/slowlogs", type=str, help='Root Folder tout output logs to ')
+    parser.add_argument('-root_dir', default="/tmp/slowlogs", type=str, help='Root Folder tout output slowlogs Files to ')
 
 
     args = parser.parse_args()
