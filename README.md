@@ -2,23 +2,26 @@
 
 Polls Redis Slow logs into parseable log files.
 
-### Objective
+# Objective
 
-Keep the Redis SlowLogs so that they can be parsed and ingested using a third party tool for observability purposes. 
+Persist Redis SlowLogs on files so that they can be parsed and ingested using a third party tool for observability purposes. 
 
-### Main Features
+# Main Features
 
 * Streamer allows configurable slowlog latency threshold  (defaults to 10ms)
 * Consumer outputs  text files ton configurable locations
 * log rotation supported
 * Streamer should restore slowlogs default settings (threshold and size) before exiting
 
-
 # Architecture
 
 ![architcture](./img/arch-2024-11-12-1710.png)
 
 Multiple Streamers Consumers can be used in parallel to scale out the process to multiple databases and streams.
+
+# How to use
+< coming soon >
+
 
 # Parsing Redis Slowlogs and ingest them to Elasticsearch
 
