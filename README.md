@@ -2,17 +2,17 @@
 
 Polls Redis Slow logs into parseable log files.
 
-# Objective
+## Objective
 
 Persist Redis SlowLogs on text files so that they can be parsed and ingested using a third party tool for observability purposes. 
 
-# Main Features
+## Main Features
 
 * Streamer allows configurable slowlog latency threshold  (defaults to 10ms) - You can log every command by specifying 0 threshold
 * Consumer outputs text files to a configurable location with log rotation enabled 
 * Streamer  restores slowlog default settings (threshold and size) before exiting
 
-# Architecture
+## Architecture
 
 ![architcture](./img/arch-2024-11-12-1710.png)
 
@@ -20,16 +20,16 @@ Multiple Streamers Consumers can be used in parallel to scale out the process to
 The Slowlogs Streamer polls slowlogs from a Redis DB and writes them into a stream on a separate Redis Database (dedicated for this task)
 The Slowlogs Consumer reads from the Slowlogs Events Stream and writes to text files
 
-# How to use
+## How to use
 < coming soon >
 
 
-# Parsing Redis Slowlogs and ingest them to Elasticsearch
+## Parsing Redis Slowlogs and ingest them to Elasticsearch
 
-This can be  done using  [the redis slow logs parser tool]([https://pages.github.com/](https://github.com/zumo64/redis-logs-parser)). 
+This can be  done using  [the redis slow logs parser tool](https://github.com/zumo64/redis-logs-parser). 
 You will be able to track command latency in real time and view the percentile latency histogram
 
-# Example usage
+## Example usage
 
 ### Start the slowlog streamer and connect to a target Redis Enterprise database:
 
