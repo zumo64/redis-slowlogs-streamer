@@ -26,7 +26,7 @@ The Slowlogs Consumer reads from the Slowlogs Events Stream and writes to text f
 
 # Parsing Redis Slowlogs and ingest them to Elasticsearch
 
-This can be  done using  [the redis slow logs parser tool]([https://pages.github.com/](https://github.com/zumo64/redis-logs-parser)). 
+This can be  done using  [the redis slow logs parser tool](https://pages.github.com/](https://github.com/zumo64/redis-logs-parser). 
 You will be able to track command latency in real time and view the percentile latency histogram
 
 # Example usage
