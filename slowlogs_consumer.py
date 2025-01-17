@@ -27,7 +27,7 @@ def parse_arguments():
     parser.add_argument('-z', default=False, type=bool, help='Read from the beggining (True) of the stream or from the end (default = False)')
 
 
-    parser.add_argument('-stream', type=str, help='The name of the stream to consume logs from')
+    parser.add_argument('-stream', default="localhost:6379",  type=str, help='The name of the stream to consume logs from')
     parser.add_argument('-root_dir', default="/tmp/slowlogs", type=str, help='Root Folder tout output slowlogs Files to ')
 
 

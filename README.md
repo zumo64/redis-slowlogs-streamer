@@ -20,8 +20,24 @@ Multiple Streamers Consumers can be used in parallel to scale out the process to
 The Slowlogs Streamer polls slowlogs from a Redis DB and writes them into a stream on a separate Redis Database (dedicated for this task)
 The Slowlogs Consumer reads from the Slowlogs Events Stream and writes to text files
 
-## How to use
-< coming soon >
+## How to use with Docker (WIP)
+
+# start a local Redis Server
+
+```
+docker run -p 6379:6379 redis/redis-stack-server:latest
+```
+
+# create some traffic
+```
+memtier
+``` 
+
+
+```
+docker build -t slowlogs-streamer --target logs-streamer .
+docker build -t slowlogs-consumer --target logs-consumer .
+```
 
 
 ## Parsing Redis Slowlogs and ingest them to Elasticsearch
