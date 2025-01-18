@@ -20,9 +20,9 @@ Multiple Streamers Consumers can be used in parallel to scale out the process to
 The Slowlogs Streamer polls slowlogs from a Redis DB and writes them into a stream on a separate Redis Database (dedicated for this task)
 The Slowlogs Consumer reads from the Slowlogs Events Stream and writes to text files
 
-## How to use with Docker (WIP)
+## How to use with Docker 
 
-# create a local network
+### create a local network
 
 Open a new terminal and run:
 
@@ -30,7 +30,7 @@ Open a new terminal and run:
 docker network create slowlogs-network
 ```
 
-# Start a local Redis Server used as target Slowlogs analysis
+### Start a local Redis Server used as target Slowlogs analysis
 
 Open a new terminal and run:
 
@@ -39,7 +39,7 @@ docker run --rm --name redis_server --network slowlogs-network -p 6379:6379 redi
 ```
 
 
-# Start a local Redis Server used for Slowlog streams
+### Start a local Redis Server used for Slowlog streams
 
 Open a new terminal and run:
 
@@ -48,7 +48,7 @@ docker run --rm --name redis_streams --network slowlogs-network -p 6389:6379 red
 ```
 
 
-# Build the consumer and Streamer images 
+### Build the consumer and Streamer images 
 
 Open a new terminal and from the project folder run:
 
@@ -57,7 +57,7 @@ docker build -t slowlogs-streamer --target logs-streamer .
 docker build -t slowlogs-consumer --target logs-consumer .
 ```
 
-# Start the Streamer agent 
+### Start the Streamer agent 
 
 Open a new terminal and run:
 
@@ -66,14 +66,14 @@ docker run --rm --name streamer --network slowlogs-network -it slowlogs-streamer
 ```
 This will start the streamer and maintain it until user presses CTRL-C
 
-# Start the Consumer agent 
+### Start the Consumer agent 
 
 Open a new terminal and run:
 
 ```
 docker run --rm --name consumer --network slowlogs-network -v ~/tmp/slowlogs:/tmp/slowlogs -it slowlogs-consumer:latest -h redis_streams -p 6379 -stream redis_server:6379
 ```
-# Generate some traffic using memtier
+### Generate some traffic using memtier
 
 Populate the database 10 doc per second for 5 minutes.
 
