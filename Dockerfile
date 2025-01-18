@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY slowlogs_consumer.py /app/
 
 # Define the command to run your application
-CMD ["python", "slowlogs_consumer.py"]
+ENTRYPOINT ["python", "slowlogs_consumer.py"]
 
 
 # Use the official Python base image
@@ -33,4 +33,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY slowlogs_streamer.py /app/
 
 # Define the command to run your application
-CMD ["python", "slowlogs_streamer.py"]
+ENTRYPOINT [ "python", "slowlogs_streamer.py"]
+

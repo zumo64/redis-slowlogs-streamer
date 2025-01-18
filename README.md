@@ -22,22 +22,68 @@ The Slowlogs Consumer reads from the Slowlogs Events Stream and writes to text f
 
 ## How to use with Docker (WIP)
 
-# start a local Redis Server
+# create a local network
+
+Open a new terminal and run:
 
 ```
-docker run -p 6379:6379 redis/redis-stack-server:latest
+docker network create slowlogs-network
 ```
 
-# create some traffic
-```
-memtier
-``` 
+# Start a local Redis Server used as target Slowlogs analysis
 
+Open a new terminal and run:
+
+```
+docker run --rm --name redis_server --network slowlogs-network -p 6379:6379 redis/redis-stack-server:latest
+```
+
+
+# Start a local Redis Server used for Slowlog streams
+
+Open a new terminal and run:
+
+```
+docker run --rm --name redis_streams --network slowlogs-network -p 6389:6379 redis/redis-stack-server:latest
+```
+
+
+# Build the consumer and Streamer images 
+
+Open a new terminal and from the project folder run:
 
 ```
 docker build -t slowlogs-streamer --target logs-streamer .
 docker build -t slowlogs-consumer --target logs-consumer .
 ```
+
+# Start the Streamer agent 
+
+Open a new terminal and run:
+
+```
+docker run --rm --name streamer --network slowlogs-network -it slowlogs-streamer:latest -h redis_server -p 6379 -stream_host redis_streams -stream_port 6379 -threshold 0
+```
+This will start the streamer and maintain it until user presses CTRL-C
+
+# Start the Consumer agent 
+
+Open a new terminal and run:
+
+```
+docker run --rm --name consumer --network slowlogs-network -v ~/tmp/slowlogs:/tmp/slowlogs -it slowlogs-consumer:latest -h redis_streams -p 6379 -stream redis_server:6379
+```
+# Generate some traffic using memtier
+
+Populate the database 10 doc per second for 5 minutes.
+
+Open a new terminal and run:
+
+```
+docker run --rm --name memtier --network slowlogs-network redislabs/memtier_benchmark:2.1.3 -s redis_server -p 6379 --hide-histogram --pipeline=1 --threads=1 --clients=1 --rate-limiting=10 --test-time=300 --data-size=20 --ratio=1:0
+``` 
+
+Check the Slow logs in  ~/tmp/slowlogs.
 
 
 ## Parsing Redis Slowlogs and ingest them to Elasticsearch
@@ -45,7 +91,7 @@ docker build -t slowlogs-consumer --target logs-consumer .
 This can be  done using  [the redis slow logs parser tool](https://github.com/zumo64/redis-logs-parser). 
 You will be able to track command latency in real time and view the percentile latency histogram
 
-## Example usage
+## Other Usage Examples
 
 ### Start the slowlog streamer and connect to a target Redis Enterprise database:
 
@@ -73,11 +119,10 @@ The target stream name will be `zumo.redis.test.localhost:6379`
 
 ### Start the slowlog Consumer script to read the slowlog events and dump events to a folder:
 ```
-python slowlogs_consumer.py -h 127.0.0.1 -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/zumo/dev/SupportPackages/Redis-CS
+python slowlogs_consumer.py -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/zumo/dev/SupportPackages/Redis-CS
 ```
 
 ### Start the slowlog Consumer script to read the slowlog events from the beginning of the stream and dump events to a folder
-```
-python slowlogs_consumer.py -h 127.0.0.1 -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/christianzumbiehl/dev/SupportPackages/Redis-CS -z True
+``` -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/christianzumbiehl/dev/SupportPackages/Redis-CS -z True
 ```
 

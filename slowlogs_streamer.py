@@ -53,8 +53,8 @@ def parse_arguments():
 
 
     # Optional flags and parameters
-    parser.add_argument('-threshold', type=int, default=10, help='Slowlog threshold in micro seconds (default 10000): any commands slower than the value will be included in the slowlogs - 0 logs all commands')
-    parser.add_argument('-t', type=int, default=-1, help='Time in seconds  to operate the script before terminating (default: -1 for ever)')
+    parser.add_argument('-threshold', type=int, default=10000, help='Slowlog threshold in micro seconds (default 10000): any commands slower than the value will be included in the slowlogs - use  0 to log all commands')
+    parser.add_argument('-t', type=int, default=-1, help='Time in seconds  to operate the script before terminating (default: -1 for "run for ever")')
     parser.add_argument('-T', type=float, default=10, help='Sleep interval in milliseconds between consecutive loops (default: 10 ms)')
 
     # Check if custom help is requested by handling multiple help options
@@ -126,6 +126,8 @@ def poll_slowlogs(r, ro, stop_event, sleep_interval,key):
 
 
 def main():
+
+
     # Parse command-line arguments
     args = parse_arguments()
 
