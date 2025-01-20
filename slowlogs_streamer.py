@@ -125,9 +125,8 @@ def poll_slowlogs(r, ro, stop_event, sleep_interval,key):
         time.sleep(sleep_interval)
 
 
+
 def main():
-
-
     # Parse command-line arguments
     args = parse_arguments()
 
@@ -177,12 +176,13 @@ def main():
         rprod.config_set("slowlog-log-slower-than", 10000)
 
 
-
+    # Put back Slow logs defaults
     except KeyboardInterrupt:
         rprod.config_set("slowlog-max-len", "128")
         rprod.config_set("slowlog-log-slower-than", 10000)
         stop_event.set()
         slowlog_poller_thread.join()
+        print("Restored slowlog defaults and")
         print("Exiting...")
 
 if __name__ == "__main__":
