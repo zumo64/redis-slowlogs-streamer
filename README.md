@@ -95,7 +95,7 @@ You will be able to track command latency in real time and view the percentile l
 
 ## Other Usage Examples
 
-### Start the slowlog streamer and connect to a target Redis Enterprise database:
+### Starting the slowlog streamer and connect to a target Redis Enterprise database:
 
 ```
 python slowlogs_streamer.py -c zu743.primary.cs.redislabs.com -h 172.31.43.246 -p 18817 -a redis -stream_port 6389 -threshold 6
@@ -107,7 +107,7 @@ Only commands with latency >=6ms are considered
 The target stream name will be `zu743.primary.cs.redislabs.com:18817`
 
 
-### Start the slowlog streamer and connect to a target Redis CE database:
+### Starting the slowlog streamer and connect to a target Redis CE database:
 
 ```
 python slowlogs_streamer.py -c zumo.redis.test.localhost -h localhost -p 6379 -stream_host localhost -stream_port 6389 -threshold 6
@@ -119,7 +119,7 @@ Only commands with latency >=6ms are considered
 The target stream name will be `zumo.redis.test.localhost:6379`
 
 
-### Start the slowlog Consumer script to read the slowlog events and dump events to a folder:
+### Starting the slowlog Consumer script to read the slowlog events and dump events to a folder:
 ```
 python slowlogs_consumer.py -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/zumo/dev/SupportPackages/Redis-CS
 ```
