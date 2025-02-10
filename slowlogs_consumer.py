@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 import argparse
 from datetime import datetime
+import threading
 
 
 output_file_prefix = 'slowlog'
@@ -64,6 +65,7 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning):
         # Read messages from the stream with BLOCK to wait for new messages
         messages = redis.xread( streams= {stream_name : lastid},block=5000, count=50)
 
+        f = open(file_path, 'a')
         if messages:
             with (open(file_path, 'a') as f):
                 for stream, msg_list in messages:
@@ -96,8 +98,10 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning):
             file_size = os.path.getsize(file_path)
             # New Log File every Milion bytes
             if file_size >= max_size:
+                f.close()
                 log_counter = log_counter+1
-                file_path = os.path.join(folder_path, "slowlog." + str(log_counter) + ".log")
+                #file_path = os.path.join(folder_path, "slowlog-" + str(log_counter) + ".log")
+                file_path = os.path.join(folder_path,  output_file+"-"+str(log_counter)+ ".log")
                 print(f"Writing to File {file_path} ")
 
         finally:
@@ -115,8 +119,20 @@ def main():
     # Connect to Redis
     r = redis.StrictRedis(host=args.h, port=args.p, decode_responses=True)
 
-    print(f"Connected to Redis ..")
-    consume_stream(r,folder_path,args.stream,args.z)
+    print(f"Connected to Redis ...")
+
+    try:
+        stop_event = threading.Event()
+        slowlog_consumer_thread = threading.Thread(target=consume_stream, args=(r,folder_path,args.stream,args.z))
+        slowlog_consumer_thread.start()
+        #consume_stream(r,folder_path,args.stream,args.z)
+
+    except KeyboardInterrupt:
+        print("Exiting...")
+        stop_event.set()
+        slowlog_consumer_thread.join()
+        
+
 
 if __name__ == "__main__":
     main()
