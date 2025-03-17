@@ -8,8 +8,10 @@ Persist Redis SlowLogs on text files so that they can be parsed and ingested usi
 
 ## Main Features
 
+* Poll Slowlogs with configurable polling interval and latency threshold
 * Streamer allows configurable slowlog latency threshold  (defaults to 10ms) - You can log every command by specifying 0 threshold
-* Consumer outputs text files to a configurable location with log rotation enabled 
+* Consumer outputs slow logs to text files to a configurable location with log rotation enabled 
+* Consumer outputs slow logs to TSDB 
 * Streamer  restores slowlog default settings (threshold and size) before exiting
 
 ## Architecture
@@ -64,7 +66,7 @@ docker build -t slowlogs-consumer --target logs-consumer .
 Open a new terminal and run:
 
 ```
-docker run --rm --name streamer --network slowlogs-network -it slowlogs-streamer:latest -h redis_server -p 6379 -stream_host redis_streams -stream_port 6379 -threshold 0
+docker run --rm --name streamer --network slowlogs-network -it slowlogs-streamer:latest -h redis_server -p 6379 -stream_host redis_streams -stream_port 6379 -threshold 0 -ignore slowlog,sping,info
 ```
 This will start the streamer and maintain it until user presses CTRL-C
 
@@ -73,7 +75,7 @@ This will start the streamer and maintain it until user presses CTRL-C
 Open a new terminal and run:
 
 ```
-docker run --rm --name consumer --network slowlogs-network -v ~/tmp/slowlogs:/tmp/slowlogs -it slowlogs-consumer:latest -h redis_streams -p 6379 -stream redis_server:6379
+docker run --rm --name consumer --network slowlogs-network -v ~/tmp/slowlogs:/tmp/slowlogs -it slowlogs-consumer:latest -h redis_streams -p 6379 -stream redis_server:6379 -outfile -ts
 ```
 ### Generate some traffic using memtier
 
@@ -86,6 +88,20 @@ docker run --rm --name memtier --network slowlogs-network redislabs/memtier_benc
 ``` 
 
 Check the Slow logs in  ~/tmp/slowlogs.
+
+
+## Visualizing the Slow Logs with Time Series 
+
+When using the -ts option on the consumer, a Time Series is created for each command in the Streamer Database.
+You can viusualize that time series in Redis Insight using:
+
+```
+TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=redis_server:6379 GROUPBY command REDUCE max
+```
+
+![tsdb](./img/tsdb.png)
+
+
 
 
 ## Parsing Redis Slowlogs and ingest them to Elasticsearch
@@ -127,4 +143,5 @@ python slowlogs_consumer.py -p 6389 -stream zumo.redis.test.localhost:6379 -root
 ### Start the slowlog Consumer script to read the slowlog events from the beginning of the stream and dump events to a folder
 ``` -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/christianzumbiehl/dev/SupportPackages/Redis-CS -z True
 ```
+
 

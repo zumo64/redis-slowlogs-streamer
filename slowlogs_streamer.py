@@ -56,6 +56,7 @@ def parse_arguments():
     parser.add_argument('-threshold', type=int, default=10000, help='Slowlog threshold in micro seconds (default 10000): any commands slower than the value will be included in the slowlogs - use  0 to log all commands')
     parser.add_argument('-t', type=int, default=-1, help='Time in seconds  to operate the script before terminating (default: -1 for "run for ever")')
     parser.add_argument('-T', type=float, default=10, help='Sleep interval in milliseconds between consecutive loops (default: 10 ms)')
+    parser.add_argument('-ignore', type=str, default='SLOWLOG,SPING',help='Ignore some commands in the stream')
 
     # Check if custom help is requested by handling multiple help options
     parser.add_argument('-H', action='store_true', help='Show help')
@@ -84,8 +85,13 @@ def addlog(r,key,log):
     return logid
 
 
+def starts_with_token_ignore_case(s, tokens):
+    # Convert the input string to lower case for case insensitive comparison
+    s = s.lower()
+    # Check if the string starts with any of the tokens (also in lower case)
+    return any(s.startswith(token.lower()) for token in tokens)
 
-def poll_slowlogs(r, ro, stop_event, sleep_interval,key):
+def poll_slowlogs(r, ro, stop_event, sleep_interval,key,black_listed_commands):
 
     topOfListId = -1
     countrecords = 0
@@ -107,7 +113,9 @@ def poll_slowlogs(r, ro, stop_event, sleep_interval,key):
 
             # ignore some commands that are useless in the stream
             command = str(log.get('command'), 'utf-8')
-            if command.startswith('SLOWLOG') or command.startswith('SPING'):
+
+            #if command.startswith('SLOWLOG') or command.startswith('SPING'):
+            if starts_with_token_ignore_case(command , black_listed_commands):
                 continue
 
             if i == len(sl)-1:
@@ -153,10 +161,14 @@ def main():
         else:
             key = args.h +':'+ str(args.p)
 
+        black_list_tokens = []
+        if args.ignore != None:
+            black_list_tokens = [token.strip() for token in args.ignore.split(',')]
+
         print(f"using stream name: {key}")
         # Start a separate thread to listen for event space notifications
         stop_event = threading.Event()
-        slowlog_poller_thread = threading.Thread(target=poll_slowlogs, args=(rprod, rstream,  stop_event, 5, key ))
+        slowlog_poller_thread = threading.Thread(target=poll_slowlogs, args=(rprod, rstream,  stop_event, 5, key, black_list_tokens ))
         slowlog_poller_thread.start()
         # Sleep for ever is default
         if args.t == -1:
