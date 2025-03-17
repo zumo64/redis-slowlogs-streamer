@@ -104,7 +104,7 @@ TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=redis_server:6379 GR
 
 
 
-## Parsing Redis Slowlogs and ingest them to Elasticsearch
+# Parsing Redis Slowlogs and ingest them to Elasticsearch
 
 This can be  done using  [the redis slow logs parser tool](https://github.com/zumo64/redis-logs-parser). 
 You will be able to track command latency in real time and view the percentile latency histogram
