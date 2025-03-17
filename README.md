@@ -137,11 +137,12 @@ The target stream name will be `zumo.redis.test.localhost:6379`
 
 ### Starting the slowlog Consumer script to read the slowlog events and dump events to a folder:
 ```
-python slowlogs_consumer.py -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/zumo/dev/SupportPackages/Redis-CS
+python slowlogs_consumer.py -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/zumo/dev/SupportPackages/Redis-CS -outfile
 ```
 
 ### Start the slowlog Consumer script to read the slowlog events from the beginning of the stream and dump events to a folder
-``` -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/christianzumbiehl/dev/SupportPackages/Redis-CS -z True
+```
+python slowlogs_consumer.py -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/christianzumbiehl/dev/SupportPackages/Redis-CS -z -outfile
 ```
 
 
