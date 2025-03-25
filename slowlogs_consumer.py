@@ -98,7 +98,7 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, create
                             }
 
                             # log duration in miliseconds
-                            redis.ts().add(stream_name+":"+s ,startTime  * 1000 ,duration * 1000,labels=labelsDict,duplicate_policy="max")
+                            redis.ts().add(stream_name+":"+s ,startTime  * 1000 ,duration,labels=labelsDict,duplicate_policy="max")
 
                         if count == len(command_parts) or not createFiles:
                             break

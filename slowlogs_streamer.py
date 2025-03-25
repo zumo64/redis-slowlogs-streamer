@@ -118,17 +118,17 @@ def poll_slowlogs(r, ro, stop_event, sleep_interval,key,black_listed_commands):
                     topOfListId = currentId
                 continue
 
-            if i == len(sl)-1:
+            if i == len(sl) - 1 and currentId >= topOfListId:
                 topOfListId = currentId
 
             try:
                 addlog(ro,key, log)
-                countrecords = countrecords+1
+
+            #except redis.exceptions.RedisError as e:
+                #print(e)
 
             finally:
                 continue
-
-        #print(f"added {countrecords} log events")
 
         time.sleep(sleep_interval)
 
