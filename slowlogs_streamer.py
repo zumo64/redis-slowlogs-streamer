@@ -79,9 +79,8 @@ def addlog(r,key,log):
 
     stime = str(log.get('start_time'))+"-*"
     logid = log.get('id')
-    command = log.get('command')
+    #print(f" ------> added in log stream element : key {key} -  logid {logid}  id  {stime} command {log.get('command')}")
     r.xadd(key , log, str(stime))
-    #print(f" ------> added in log stream element : key {key} -  logid {logid}  id  {stime} command {command} ")
     return logid
 
 
@@ -111,11 +110,12 @@ def poll_slowlogs(r, ro, stop_event, sleep_interval,key,black_listed_commands):
             if currentId <= topOfListId :
                 continue
 
-            # ignore some commands that are useless in the stream
+            # ignore some commands that are not relevant  in the stream
             command = str(log.get('command'), 'utf-8')
 
-            #if command.startswith('SLOWLOG') or command.startswith('SPING'):
             if starts_with_token_ignore_case(command , black_listed_commands):
+                if i == len(sl) - 1:
+                    topOfListId = currentId
                 continue
 
             if i == len(sl)-1:
@@ -151,9 +151,10 @@ def main():
         # start logging everything
         rprod.config_set("slowlog-max-len",1024)
         # slowlog-log-slower-than expects microseconds
-        rprod.config_set("slowlog-log-slower-than", args.threshold)
+        rprod.slowlog_reset()
         print(f"using Threshold : {args.threshold} micro seconds")
 
+        rprod.config_set("slowlog-log-slower-than", args.threshold)
         # stream name is <cluster FQDN>:<DB port>
         # defaults to host name
         if args.c != None:
