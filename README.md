@@ -1,6 +1,7 @@
 # redis-slowlogs-streamer
 
-Polls Redis Slow logs into parseable log files.
+* Polls Redis Slow logs into a Redis Stream 
+* Consumes the Stream and dumps to parseable log files or to a Redis TSDB
 
 ## Objective
 
