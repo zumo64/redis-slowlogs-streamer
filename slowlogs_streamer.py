@@ -92,34 +92,36 @@ def starts_with_token_ignore_case(s, tokens):
 
 def poll_slowlogs(r, ro, stop_event, sleep_interval,key,black_listed_commands):
 
-    topOfListId = -1
+    # Keep track of the most recent slow log sent
+    top_of_list_id = -1
     countrecords = 0
 
     while not stop_event.is_set():
 
         # Get all slowlogs in buffer
-        # -1 generates an Exception with RS
         sl = r.slowlog_get(-1)
 
-        # reverse the order to send  most recent log last (top of the Stream)
+        # reverse the order of slowlogs
+        # to send  most recent log last (top of the Stream)
         for i, log in enumerate(reversed(sl)):
 
-            currentId = log.get('id')
+            current_id = log.get('id')
 
-            # ignore entry until reaching new slowlogs
-            if currentId <= topOfListId :
+            # ignore entries until reaching top of list (new slowlogs)
+            if current_id <= top_of_list_id :
                 continue
 
-            # ignore some commands that are not relevant  in the stream
+
+            # ignore  commands that are not relevant  in the stream (black listed)
             command = str(log.get('command'), 'utf-8')
-
             if starts_with_token_ignore_case(command , black_listed_commands):
-                if i == len(sl) - 1:
-                    topOfListId = currentId
                 continue
 
-            if i == len(sl) - 1 and currentId >= topOfListId:
-                topOfListId = currentId
+            #if i == len(sl) - 1 and current_id >= top_of_list_id:
+            #    top_of_list_id = current_id
+
+
+            top_of_list_id = current_id
 
             try:
                 addlog(ro,key, log)
@@ -169,7 +171,7 @@ def main():
         print(f"using stream name: {key}")
         # Start a separate thread to listen for event space notifications
         stop_event = threading.Event()
-        slowlog_poller_thread = threading.Thread(target=poll_slowlogs, args=(rprod, rstream,  stop_event, 5, key, black_list_tokens ))
+        slowlog_poller_thread = threading.Thread(target=poll_slowlogs, args=(rprod, rstream,  stop_event, 20, key, black_list_tokens ))
         slowlog_poller_thread.start()
         # Sleep for ever is default
         if args.t == -1:
