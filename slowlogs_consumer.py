@@ -137,7 +137,7 @@ def main():
         os.makedirs(folder_path, exist_ok=True)
 
     # Connect to Redis
-    r = redis.StrictRedis(host=args.h, port=args.p, decode_responses=True)
+    r = redis.StrictRedis(host=args.h, port=args.p, username=args.stream_user, password=args.stream_password,decode_responses=True)
 
     print(f"Connected to Redis ...")
 
