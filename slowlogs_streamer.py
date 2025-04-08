@@ -53,7 +53,7 @@ def parse_arguments():
 
 
     # Optional flags and parameters
-    parser.add_argument('-threshold', type=int, default=10000, help='Slowlog threshold in micro seconds (default 10000): any commands slower than the value will be included in the slowlogs - use  0 to log all commands')
+    parser.add_argument('-threshold', type=int, default=10000, help='Slowlog threshold in micro seconds (default 10000): any commands slower than the value will be included in the slowlogs - use 20 as a minimum')
     parser.add_argument('-t', type=int, default=-1, help='Time in seconds  to operate the script before terminating (default: -1 for "run for ever")')
     parser.add_argument('-T', type=float, default=10, help='Sleep interval in milliseconds between consecutive loops (default: 10 ms)')
     parser.add_argument('-ignore', type=str, default='SLOWLOG,SPING',help='Ignore some commands in the stream')
@@ -116,10 +116,6 @@ def poll_slowlogs(r, ro, stop_event, sleep_interval,key,black_listed_commands):
             command = str(log.get('command'), 'utf-8')
             if starts_with_token_ignore_case(command , black_listed_commands):
                 continue
-
-            #if i == len(sl) - 1 and current_id >= top_of_list_id:
-            #    top_of_list_id = current_id
-
 
             top_of_list_id = current_id
 
