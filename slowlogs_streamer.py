@@ -47,7 +47,7 @@ def parse_arguments():
 
     parser.add_argument('-stream_host', default='localhost', type=str, help='Host (FQDN) of the Redis database (default: localhost)')
     parser.add_argument('-stream_port', default=6389, type=int, help='Port of the Redis Streaming database (default: 6389)')
-    parser.add_argument('-stream_user', default='redis', type=str, help='user of the Redis Streaming database')
+    parser.add_argument('-stream_user', default=None, type=str, help='user of the Redis Streaming database')
     parser.add_argument('-stream_password', default=None, type=str, help='password of the Redis Streaming database')
     parser.add_argument('-max_stream_size', default=-1, type=str, help='Maximum nummber of elements in the stream')
 
