@@ -23,9 +23,12 @@ def parse_arguments():
     parser = argparse.ArgumentParser(add_help=False)
 
     # Mandatory parameters for host (-h) and port (-p)
-    parser.add_argument('-h', default='localhost', type=str, help='Host (FQDN) of the Redis database used for streaming (default: localhost)')
-    parser.add_argument('-p', default=6379, type=int, help='Port of the Redis database used for streaming  (default: 6379)')
-    parser.add_argument('-a', default='redis', type=str, help='user:password')
+    #parser.add_argument('-h', default='localhost', type=str, help='Host (FQDN) of the Redis database used for streaming (default: localhost)')
+    #parser.add_argument('-p', default=6379, type=int, help='Port of the Redis database used for streaming  (default: 6379)')
+    parser.add_argument('-stream_host', default='localhost', type=str, help='Host (FQDN) of the Redis database (default: localhost)')
+    parser.add_argument('-stream_port', default=6389, type=int, help='Port of the Redis Streaming database (default: 6389)')
+    parser.add_argument('-stream_user', default=None, type=str, help='user of the Redis Streaming database')
+    parser.add_argument('-stream_password', default=None, type=str, help='password of the Redis Streaming database')
     parser.add_argument('-z', action="store_true", help='If specified reads from the beginning of the stream')
     parser.add_argument('-ts', action="store_true", help='creates a TS for each command from the Stream')
     parser.add_argument('-outfile', action="store_true", help='dumps Slow Log files in the specified root_dir')
@@ -137,7 +140,7 @@ def main():
         os.makedirs(folder_path, exist_ok=True)
 
     # Connect to Redis
-    r = redis.StrictRedis(host=args.h, port=args.p, username=args.stream_user, password=args.stream_password,decode_responses=True)
+    r = redis.StrictRedis(host=args.stream_host, port=args.stream_port, username=args.stream_user, password=args.stream_password,decode_responses=True)
 
     print(f"Connected to Redis ...")
 
