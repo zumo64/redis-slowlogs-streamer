@@ -141,7 +141,9 @@ def main():
         # Connect to the Redis server
         rprod = redis.Redis(host=args.h, port=args.p, username=args.u, password=args.a)
         print(f"Polling slowlogs from Redis database {args.h}:{str(args.p)}")
-        rstream = redis.StrictRedis(host=args.stream_host, port=args.stream_port, decode_responses=True)
+
+
+        rstream = redis.StrictRedis(host=args.stream_host, port=args.stream_port, username=args.stream_user, password=args.stream_password, decode_responses=True)
         print(f"Streaming Slowlogs to host {args.stream_host}:{str(args.stream_port)}")
 
 

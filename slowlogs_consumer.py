@@ -24,7 +24,7 @@ def parse_arguments():
 
     # Mandatory parameters for host (-h) and port (-p)
     parser.add_argument('-h', default='localhost', type=str, help='Host (FQDN) of the Redis database used for streaming (default: localhost)')
-    parser.add_argument('-p', default=6379, type=int, help='Port of the Redis database (default: 6379)')
+    parser.add_argument('-p', default=6379, type=int, help='Port of the Redis database used for streaming  (default: 6379)')
     parser.add_argument('-a', default='redis', type=str, help='user:password')
     parser.add_argument('-z', action="store_true", help='If specified reads from the beginning of the stream')
     parser.add_argument('-ts', action="store_true", help='creates a TS for each command from the Stream')
