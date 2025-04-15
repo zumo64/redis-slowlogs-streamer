@@ -1,14 +1,15 @@
 import redis
-from datetime import datetime
+from prometheus_client import start_http_server, Counter, Gauge, Summary
 import os
 import argparse
 from datetime import datetime, timezone
 import threading
-from redis.exceptions import ResponseError
 
+LATENCY = Summary('slowlog_latency', 'Request latency in s', ['command'])
 
 output_file_prefix = 'slowlog'
 max_size = 500000
+
 
 # testing with
 #-h 127.0.0.1
@@ -51,8 +52,10 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, create
     output_file = output_file_prefix +"-"+formatted_time
 
     log_counter = 1
-    file_path = os.path.join(folder_path, output_file+"-"+str(log_counter)+".log")
-    print(f"Writing to File {file_path} ")
+
+    if createFiles:
+        file_path = os.path.join(folder_path, output_file+"-"+str(log_counter)+".log")
+        print(f"Writing to File {file_path} ")
 
     if fromBeginning:
         lastid = '0'
@@ -87,7 +90,8 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, create
                     command_parts = command_str.split()
                     # Initialize an empty string to store the result
                     output_command = ""
-                    # Loop through the array and concatenate each string
+
+                    # Loop through the array of words and concatenate each string
                     count = 1
                     for s in command_parts:
                         output_command += "b'"+ s + "'"
@@ -100,6 +104,7 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, create
                                 "series":stream_name
                             }
 
+                            LATENCY.labels(command=s ).observe(duration)
                             # log duration in miliseconds
                             redis.ts().add(stream_name+":"+s ,startTime  * 1000 ,duration,labels=labelsDict,duplicate_policy="max")
 
@@ -145,6 +150,7 @@ def main():
     print(f"Connected to Redis ...")
 
     try:
+        start_http_server(8000)
         stop_event = threading.Event()
         slowlog_consumer_thread = threading.Thread(target=consume_stream, args=(r,folder_path,args.stream,args.z,args.ts,args.outfile))
         slowlog_consumer_thread.start()
