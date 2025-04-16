@@ -5,7 +5,11 @@ import argparse
 from datetime import datetime, timezone
 import threading
 
-LATENCY = Summary('slowlog_latency', 'Request latency in s', ['command'])
+#LATENCY = Summary('slowlog_latency', 'Request latency in ms', ['command'])
+LATENCY = Gauge('slowlog_latency', 'Request latency in s',['command'])
+
+
+
 
 output_file_prefix = 'slowlog'
 max_size = 500000
@@ -30,8 +34,10 @@ def parse_arguments():
     parser.add_argument('-stream_port', default=6389, type=int, help='Port of the Redis Streaming database (default: 6389)')
     parser.add_argument('-stream_user', default=None, type=str, help='user of the Redis Streaming database')
     parser.add_argument('-stream_password', default=None, type=str, help='password of the Redis Streaming database')
+    parser.add_argument('-prom_port', default=8065, type=int, help='Port used for Prometheus scraping   (default: 8065)')
     parser.add_argument('-z', action="store_true", help='If specified reads from the beginning of the stream')
     parser.add_argument('-ts', action="store_true", help='creates a TS for each command from the Stream')
+    parser.add_argument('-prom', action="store_true", help='enables prometheus exporter for each command from the Stream')
     parser.add_argument('-outfile', action="store_true", help='dumps Slow Log files in the specified root_dir')
     parser.add_argument('-stream', default="localhost:6379",  type=str, help='The name of the stream to consume logs from')
     parser.add_argument('-root_dir', default="/tmp/slowlogs", type=str, help='Root Folder tout output slowlogs Files to ')
@@ -45,7 +51,7 @@ def parse_arguments():
 
 
 # Function to consume and append messages to a file
-def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, createFiles):
+def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, exportProm, createFiles):
 
     current_time = datetime.now()
     formatted_time = current_time.strftime("%d.%m.%y-%H.%M.%S")
@@ -96,17 +102,20 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, create
                     for s in command_parts:
                         output_command += "b'"+ s + "'"
 
-                        # if we are in TS append mode , update the TS  with the command
-                        if count == 1 and createTs:
-                            labelsDict = {
-                                "command": s,
-                                "type":"slowlogs",
-                                "series":stream_name
-                            }
+                        # Eventually export TS and PROM latency for the command (first item)
+                        if count == 1:
+                            if createTs:
+                                labelsDict = {
+                                    "command": s,
+                                    "type":"slowlogs",
+                                    "series":stream_name
+                                }
 
-                            LATENCY.labels(command=s ).observe(duration)
-                            # log duration in miliseconds
-                            redis.ts().add(stream_name+":"+s ,startTime  * 1000 ,duration,labels=labelsDict,duplicate_policy="max")
+                                # log duration in miliseconds
+                                redis.ts().add(stream_name+":"+s ,startTime  * 1000 ,duration,labels=labelsDict,duplicate_policy="max")
+
+                            if exportProm:
+                                LATENCY.labels(command=s).set(duration)
 
                         if count == len(command_parts) or not createFiles:
                             break
@@ -150,9 +159,10 @@ def main():
     print(f"Connected to Redis ...")
 
     try:
-        start_http_server(8000)
+        if args.prom:
+            start_http_server(args.prom_port)
         stop_event = threading.Event()
-        slowlog_consumer_thread = threading.Thread(target=consume_stream, args=(r,folder_path,args.stream,args.z,args.ts,args.outfile))
+        slowlog_consumer_thread = threading.Thread(target=consume_stream, args=(r,folder_path,args.stream,args.z,args.ts,args.prom,args.outfile))
         slowlog_consumer_thread.start()
         #consume_stream(r,folder_path,args.stream,args.z)
 
