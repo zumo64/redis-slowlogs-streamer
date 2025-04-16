@@ -27,9 +27,6 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(add_help=False)
 
-    # Mandatory parameters for host (-h) and port (-p)
-    #parser.add_argument('-h', default='localhost', type=str, help='Host (FQDN) of the Redis database used for streaming (default: localhost)')
-    #parser.add_argument('-p', default=6379, type=int, help='Port of the Redis database used for streaming  (default: 6379)')
     parser.add_argument('-stream_host', default='localhost', type=str, help='Host (FQDN) of the Redis database (default: localhost)')
     parser.add_argument('-stream_port', default=6389, type=int, help='Port of the Redis Streaming database (default: 6389)')
     parser.add_argument('-stream_user', default=None, type=str, help='user of the Redis Streaming database')
