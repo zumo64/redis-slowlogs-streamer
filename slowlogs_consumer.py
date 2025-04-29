@@ -87,7 +87,7 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, export
                     startTime = int(message.get('start_time'))
                     #iso8601_timestamp = datetime.utcfromtimestamp(startTime).isoformat() + 'Z'
                     iso8601_timestamp = datetime.fromtimestamp(startTime, tz=timezone.utc).isoformat() + 'Z'
-                    # Convert to miliseconds
+                    # Expect microseconds in the stream  - Convert to miliseconds
                     duration = float(message.get('duration')) / 1000
                     command_str = message.get('command')
                     command_parts = command_str.split()
