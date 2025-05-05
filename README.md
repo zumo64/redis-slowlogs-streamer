@@ -78,7 +78,7 @@ Open a new terminal and run:
 ```
 docker run --rm --name consumer --network slowlogs-network -v ~/tmp/slowlogs:/tmp/slowlogs -it slowlogs-consumer:latest -h redis_streams -p 6379 -stream redis_server:6379 -outfile -ts
 ```
-### Generate some traffic using memtier
+### Generate some traffic with memtier-benchmark
 
 Populate the database 10 doc per second for 5 minutes.
 
