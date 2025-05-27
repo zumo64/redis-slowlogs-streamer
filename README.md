@@ -17,7 +17,7 @@ Persist Redis SlowLogs on text files so that they can be parsed and ingested usi
 
 ## Architecture
 
-![architcture](./img/arch-2024-11-12-1710.png)
+![architcture](./img/arch-2025-05-27.png)
 
 Multiple Streamers Consumers can be used in parallel to scale out the process to multiple databases and streams.
 The Slowlogs Streamer polls slowlogs from a Redis DB and writes them into a stream on a separate Redis Database (dedicated for this task)
