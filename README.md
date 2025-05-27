@@ -97,7 +97,12 @@ When using the -ts option on the consumer, a Time Series is created for each com
 You can viusualize that time series in Redis Insight using:
 
 ```
+# visualizing all commands TS
 TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=redis_server:6379 GROUPBY command REDUCE max
+
+# visualizing the KEYS command TS
+TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=re1:12000, command=keys GROUPBY command REDUCE max
+
 ```
 
 ![tsdb](./img/tsdb.png)
