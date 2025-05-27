@@ -101,7 +101,7 @@ You can viusualize that time series in Redis Insight using:
 TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=redis_server:6379 GROUPBY command REDUCE max
 
 # visualizing the KEYS command TS
-TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=re1:12000, command=keys GROUPBY command REDUCE max
+TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=re1:12000 command=keys GROUPBY command REDUCE max
 
 ```
 
