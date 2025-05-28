@@ -1,7 +1,7 @@
 # redis-slowlogs-streamer
 
 * Polls Redis Slow logs into a Redis Stream 
-* Consumes the Stream and dumps to parseable log files or to a Redis TSDB
+* Consumes the Stream and dumps to parseable log file,  to Redis TSDB, and as Prometheus metrics.
 
 ## Objective
 
