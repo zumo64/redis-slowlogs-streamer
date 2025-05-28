@@ -53,6 +53,7 @@ docker run --rm --name redis_streams --network slowlogs-network -p 6389:6379 red
 ```
 
 
+
 ### Build the consumer and Streamer images 
 
 Open a new terminal and from the project folder run:
