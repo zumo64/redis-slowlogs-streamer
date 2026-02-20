@@ -109,7 +109,7 @@ TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=re1:12000 command=ke
 ![tsdb](./img/tsdb.png)
 
 
-## Exporting command lantency to Prometheus
+## Exporting command latency to Prometheus
 
 Enable the prometheus exporter using the `-prom <prometheus_port>` command option on the consumer and connect a prometheus instance. 
  
