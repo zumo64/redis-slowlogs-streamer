@@ -1,12 +1,19 @@
 import redis
-from prometheus_client import start_http_server, Counter, Gauge, Summary
+from prometheus_client import start_http_server, Counter, Gauge, Histogram
 import os
 import argparse
 from datetime import datetime, timezone
 import threading
 
 #LATENCY = Summary('slowlog_latency', 'Request latency in ms', ['command'])
-LATENCY = Gauge('slowlog_latency', 'Request latency in s',['command'])
+LATENCY = Gauge('slowlog_latency', 'Request latency in ms (last observed)', ['command'])
+SLOWLOG_COUNT = Counter('slowlog_count_total', 'Total number of slow commands observed', ['command'])
+SLOWLOG_HIST = Histogram(
+    'slowlog_duration_ms',
+    'Slowlog latency distribution in ms',
+    ['command'],
+    buckets=[10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
+)
 
 
 
@@ -113,6 +120,8 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, export
 
                             if exportProm:
                                 LATENCY.labels(command=s).set(duration)
+                                SLOWLOG_COUNT.labels(command=s).inc()
+                                SLOWLOG_HIST.labels(command=s).observe(duration)
 
                         if count == len(command_parts) or not createFiles:
                             break

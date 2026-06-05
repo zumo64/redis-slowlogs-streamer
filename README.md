@@ -10,7 +10,7 @@ Persist Redis SlowLogs on text files so that they can be parsed and ingested usi
 ## Main Features
 
 * Poll Slowlogs with configurable polling interval and latency threshold
-* Streamer allows configurable slowlog latency threshold  (defaults to 10ms) - You can log every command by specifying 0 threshold
+* Streamer allows configurable slowlog latency threshold  (defaults to 10000µs / 10ms) - You can log every command by specifying 0 threshold
 * Consumer outputs slow logs to text files to a configurable location with log rotation enabled 
 * Consumer outputs slow logs to TSDB 
 * Streamer  restores slowlog default settings (threshold and size) before exiting
@@ -77,7 +77,7 @@ This will start the streamer and maintain it until user presses CTRL-C
 Open a new terminal and run:
 
 ```
-docker run --rm --name consumer --network slowlogs-network -v ~/tmp/slowlogs:/tmp/slowlogs -it slowlogs-consumer:latest -h redis_streams -p 6379 -stream redis_server:6379 -outfile -ts
+docker run --rm --name consumer --network slowlogs-network -v ~/tmp/slowlogs:/tmp/slowlogs -it slowlogs-consumer:latest -stream_host redis_streams -stream_port 6379 -stream redis_server:6379 -outfile -ts
 ```
 ### Generate some traffic with memtier-benchmark
 
@@ -102,7 +102,7 @@ You can viusualize that time series in Redis Insight using:
 TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=redis_server:6379 GROUPBY command REDUCE max
 
 # visualizing the KEYS command TS
-TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=re1:12000 command=keys GROUPBY command REDUCE max
+TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=redis_server:6379 command=keys GROUPBY command REDUCE max
 
 ```
 
@@ -111,7 +111,11 @@ TS.MRANGE 0 +  WITHLABELS AGGREGATION max 100 FILTER series=re1:12000 command=ke
 
 ## Exporting command latency to Prometheus
 
-Enable the prometheus exporter using the `-prom <prometheus_port>` command option on the consumer and connect a prometheus instance. 
+Enable the prometheus exporter using the `-prom` flag and optionally `-prom_port <port>` (default: 8065) on the consumer and connect a prometheus instance.
+
+```
+python slowlogs_consumer.py ... -prom -prom_port 8065
+```
  
 
 
@@ -125,35 +129,35 @@ You will be able to track command latency in real time and view the percentile l
 ### Starting the slowlog streamer and connect to a target Redis Enterprise database:
 
 ```
-python slowlogs_streamer.py -c zu743.primary.cs.redislabs.com -h 172.31.43.246 -p 18817 -a redis -stream_port 6389 -threshold 6
+python slowlogs_streamer.py -c zu743.primary.cs.redislabs.com -h 172.31.43.246 -p 18817 -a redis -stream_port 6389 -threshold 6000
 ```
 
 In this Example: 
 The streamer will connect to the Redis Host `172.31.43.246` and port 18817  using `redis` password and stream slowlog events to localhost redis DB on port 6389
-Only commands with latency >=6ms are considered
+Only commands with latency >=6000µs (6ms) are considered
 The target stream name will be `zu743.primary.cs.redislabs.com:18817`
 
 
 ### Starting the slowlog streamer and connect to a target Redis CE database:
 
 ```
-python slowlogs_streamer.py -c zumo.redis.test.localhost -h localhost -p 6379 -stream_host localhost -stream_port 6389 -threshold 6
+python slowlogs_streamer.py -c zumo.redis.test.localhost -h localhost -p 6379 -stream_host localhost -stream_port 6389 -threshold 6000
 ```
 
 In this Example: 
 The streamer will connect to the Redis localhost and stream slowlog events to localhost redis DB on port 6389
-Only commands with latency >=6ms are considered
+Only commands with latency >=6000µs (6ms) are considered
 The target stream name will be `zumo.redis.test.localhost:6379`
 
 
 ### Starting the slowlog Consumer script to read the slowlog events and dump events to a folder:
 ```
-python slowlogs_consumer.py -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/zumo/dev/SupportPackages/Redis-CS -outfile
+python slowlogs_consumer.py -stream_host localhost -stream_port 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/zumo/dev/SupportPackages/Redis-CS -outfile
 ```
 
 ### Start the slowlog Consumer script to read the slowlog events from the beginning of the stream and dump events to a folder
 ```
-python slowlogs_consumer.py -p 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/christianzumbiehl/dev/SupportPackages/Redis-CS -z -outfile
+python slowlogs_consumer.py -stream_host localhost -stream_port 6389 -stream zumo.redis.test.localhost:6379 -root_dir /Users/christianzumbiehl/dev/SupportPackages/Redis-CS -z -outfile
 ```
 
 
