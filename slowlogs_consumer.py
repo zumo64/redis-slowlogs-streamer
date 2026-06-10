@@ -6,13 +6,13 @@ from datetime import datetime, timezone
 import threading
 
 #LATENCY = Summary('slowlog_latency', 'Request latency in ms', ['command'])
-LATENCY = Gauge('slowlog_latency', 'Request latency in ms (last observed)', ['command'])
-SLOWLOG_COUNT = Counter('slowlog_count_total', 'Total number of slow commands observed', ['command'])
+LATENCY = Gauge('slowlog_latency', 'Request latency in ms (last observed)', ['command', 'db'])
+SLOWLOG_COUNT = Counter('slowlog_count_total', 'Total number of slow commands observed', ['command', 'db'])
 SLOWLOG_HIST = Histogram(
     'slowlog_duration_ms',
     'Slowlog latency distribution in ms',
-    ['command'],
-    buckets=[10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
+    ['command', 'db'],
+    buckets=[0.1, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
 )
 
 
@@ -44,6 +44,7 @@ def parse_arguments():
     parser.add_argument('-prom', action="store_true", help='enables prometheus exporter for each command from the Stream')
     parser.add_argument('-outfile', action="store_true", help='dumps Slow Log files in the specified root_dir')
     parser.add_argument('-stream', default="localhost:6379",  type=str, help='The name of the stream to consume logs from')
+    parser.add_argument('-prom_db_label', default=None, type=str, help='Optional Redis DB index label added to Prometheus metrics (e.g. "1" for db=1)')
     parser.add_argument('-root_dir', default="/tmp/slowlogs", type=str, help='Root Folder tout output slowlogs Files to ')
 
 
@@ -55,7 +56,7 @@ def parse_arguments():
 
 
 # Function to consume and append messages to a file
-def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, exportProm, createFiles):
+def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, exportProm, createFiles, db_label=''):
 
     current_time = datetime.now()
     formatted_time = current_time.strftime("%d.%m.%y-%H.%M.%S")
@@ -119,9 +120,9 @@ def consume_stream(redis,folder_path,stream_name,fromBeginning, createTs, export
                                 redis.ts().add(stream_name+":"+s ,startTime  * 1000 ,duration,labels=labelsDict,duplicate_policy="max")
 
                             if exportProm:
-                                LATENCY.labels(command=s).set(duration)
-                                SLOWLOG_COUNT.labels(command=s).inc()
-                                SLOWLOG_HIST.labels(command=s).observe(duration)
+                                LATENCY.labels(command=s, db=db_label).set(duration)
+                                SLOWLOG_COUNT.labels(command=s, db=db_label).inc()
+                                SLOWLOG_HIST.labels(command=s, db=db_label).observe(duration)
 
                         if count == len(command_parts) or not createFiles:
                             break
@@ -168,7 +169,8 @@ def main():
         if args.prom:
             start_http_server(args.prom_port)
         stop_event = threading.Event()
-        slowlog_consumer_thread = threading.Thread(target=consume_stream, args=(r,folder_path,args.stream,args.z,args.ts,args.prom,args.outfile))
+        db_label = args.prom_db_label if args.prom_db_label is not None else ''
+        slowlog_consumer_thread = threading.Thread(target=consume_stream, args=(r,folder_path,args.stream,args.z,args.ts,args.prom,args.outfile,db_label))
         slowlog_consumer_thread.start()
         #consume_stream(r,folder_path,args.stream,args.z)
 
